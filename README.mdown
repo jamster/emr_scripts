@@ -3,6 +3,10 @@ EMR Scripts
 
 Useful scripts to help you get all set up with EMR, such as bootstrap actions
 
+* Installing Ganglia <ganglia/install_ganglia.rb>
+* Installing Screen and some other utilities <config/install_screen_tree_and_config_s3.sh>
+
+
 Install Ganglia
 ---------------
     
@@ -17,6 +21,17 @@ Then when launching the cluster with the EMR client, add the following bootstrap
 
 Modify as needed
 
+Install Screen, Tree, and configure S3
+---------------
+This can obviously be broken out if needed, but was simple enough to just do in one file
+
+Use as:
+    
+    --bootstrap-action s3://<your-emr-bucket>/bootstraps/install_screen_tree_and_config_s3.sh
+
+Simple as that.
+
+Just don't forget to replace your ACCESS_KEY AND SECRET_KEY AND PASSWORD
 
 TODO
 -----------
