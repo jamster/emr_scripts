@@ -1,0 +1,40 @@
+EMR Scripts
+===========
+
+Useful scripts to help you get all set up with EMR, such as bootstrap actions
+
+Install Ganglia
+---------------
+    
+Place the script somewhere in you S3 buckets... I keep a bucket for bootstrap-actions.
+
+I use the <code>run-if</code> script written by the EMR team to determine whether or not i am installing the master or slave version of Ganglia.
+
+Then when launching the cluster with the EMR client, add the following bootstrap actions:
+
+    --bootstrap-action s3://elasticmapreduce/bootstrap-actions/run-if --args "instance.isMaster=true,s3://<your-emr-bucket>/bootstraps/install_ganglia.rb,master" \
+    --bootstrap-action s3://elasticmapreduce/bootstrap-actions/run-if --args "instance.isMaster!=true,s3://<your-emr-bucket>/bootstraps/install_ganglia.rb,slave" \
+
+Modify as needed
+
+
+TODO
+-----------
+Abstract this out for other cloud services and test on EC2 without EMR
+
+
+Authors
+-------
+
+Jason Amster <jayamster@gmail.com>
+
+Acknowledgments
+---------------
+### install_ganglia.rb
+
+This code was brought together from the following 2 blog posts
+
+* https://docs.google.com/Doc?id=dgmmft5s_45hr7hmggr
+* http://www.manamplified.org/archives/2008/03/notes-on-using-ec2-s3.html
+
+and some tips for the EMR team.
