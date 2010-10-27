@@ -7,8 +7,8 @@
 # Installs Ganglia on EMR cluster.  Should be run with the run-if bootstrap
 # action so that it installs the right software on the name-node vs slave-nodes
 # 
-# --bootstrap-action s3://bfd-emr-apps/bootstraps/run_if --args "instance.isMaster=true s3://bfd-emr-apps/bootstraps/install_ganglia.rb master" \
-# --bootstrap-action s3://bfd-emr-apps/bootstraps/run_if --args "instance.isMaster!=true s3://bfd-emr-apps/bootstraps/install_ganglia.rb slave" \
+# --bootstrap-action s3://bfd-emr-apps/bootstraps/run_if --args "instance.isMaster=true,s3://bfd-emr-apps/bootstraps/install_ganglia.rb,master" \
+# --bootstrap-action s3://bfd-emr-apps/bootstraps/run_if --args "instance.isMaster!=true,s3://bfd-emr-apps/bootstraps/install_ganglia.rb,slave" \
 
 # Reference Articles that got me here.
 #  - https://docs.google.com/Doc?id=dgmmft5s_45hr7hmggr
@@ -135,7 +135,6 @@ def configure_gmond
     command = <<-COMMAND
     sudo sed -i -e "s|\\( *mcast_join *=.*\\)|#\\1|" \
            -e "s|\\( *bind *=.*\\)|#\\1|" \
-           -e "s|\\( *mute *=.*\\)|  mute = yes|" \
            -e "s|\\( *location *=.*\\)|  location = \"master-node\"|" \
            -e "s|\\(udp_send_channel {\\)|\\1\\n  host=#{MASTER_NODE}|" \
            /etc/ganglia/gmond.conf
@@ -153,12 +152,19 @@ def configure_gmond
   run_command("sudo gmond")
 end
 
+# Directories here are overkill i'm sure, but too frustrated to play with them
 def configure_gmetad
+  rrds_home = "/mnt/var/lib/ganglia/rrds"
+  rrds_link = "/var/lib/ganglia/rrds"
   run_commands <<-COMMANDS
   sudo cp #{GANGLIA_HOME}/gmetad/gmetad.conf /etc/ganglia/
-  sudo mkdir -p /var/lib/ganglia/rrds/
-  sudo chown -R nobody /var/lib/ganglia/rrds/
-  sudo gmetad
+  sudo mkdir -p #{rrds_home}
+  sudo mkdir -p /var/lib/ganglia
+  sudo chown -R nobody #{rrds_home}
+  sudo chown -R nobody /var/lib/ganglia
+  sudo ln -nfs #{rrds_home} #{rrds_link}
+  sudo chown -R nobody #{rrds_link}
+  sudo gmetad 
   COMMANDS
 end
 
